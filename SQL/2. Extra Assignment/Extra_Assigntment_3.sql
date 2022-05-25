@@ -45,9 +45,10 @@ insert into Trainee (TraineeID, Full_Name, Birth_Date, Gender, ET_IQ, ET_Gmath, 
 
 -- Question 2: Viết lệnh để lấy ra tất cả các thực tập sinh đã vượt qua bài test đầu vào, nhóm chúng thành các tháng sinh khác nhau
 -- (Chưa làm được question 2)
-SELECT	Full_Name, Birth_Date, COUNT(Birth_Date)
+SELECT	Full_Name, month(Birth_Date)
 FROM	Trainee
-Group by Birth_Date;
+Group by Full_Name, month(Birth_Date)
+ORDER BY month(Birth_Date) ASC;
 
 -- Question 3: Viết lệnh để lấy ra thông tin của thực tập sinh có tên dài nhất.
 

@@ -1292,13 +1292,13 @@ insert into ExamQuestion (ID, ExamID, QuestionID) values (100, 66, 18);
 
 
 
--- Question 1
+-- Question 1: Viết lệnh để lấy ra danh sách nhân viên và thông tin phòng ban của họ
 SELECT 	*
 FROM	`Account` as A
-JOIN	department as D 
+LEFT JOIN	department as D 
 ON 		A.DepartmentID = D.DepartmentID;
 
--- Question 2
+-- Question 2: Viết lệnh để lấy ra thông tin các account được tạo sau ngày 20/12/2010
 SELECT	A.*, JoinDate
 FROM	`Account` as A
 JOIN	GroupAccount as GA
@@ -1321,47 +1321,64 @@ on		D.DepartmentID = A.DepartmentID
 GROUP BY	A.DepartmentID
 HAVING	COUNT(A.DepartmentID) >= 3;
 -- Question 5: Viết lệnh để lấy ra danh sách câu hỏi được sử dụng trong đề thi nhiều nhất
-SELECT A.QuestionID, COUNT(A.QuestionID)
+SELECT A.QuestionID, COUNT(A.QuestionID) as CauHoi_sudung_nhieunhat
 FROM		Question as A
 JOIN		ExamQuestion as EQ
 ON			A.QuestionID = EQ.QuestionID
 GROUP BY	A.QuestionID
-ORDER BY	COUNT(A.QuestionID) DESC
-LIMIT		1;
+HAVING		CauHoi_sudung_nhieunhat = (
+	SELECT COUNT(A.QuestionID) as Solan_cauhoi_sudung
+	FROM		Question as A
+	JOIN		ExamQuestion as EQ ON			A.QuestionID = EQ.QuestionID
+	GROUP BY	A.QuestionID
+	ORDER BY	COUNT(A.QuestionID) DESC
+	LIMIT		1);
 -- Question 6: Thông kê mỗi category Question được sử dụng trong bao nhiêu Question
-SELECT	CQ.*, COUNT(CQ.CategoryID)
+SELECT	CQ.*, COUNT(CQ.CategoryID) as Solan_sudung_CategoryQuestion
 FROM		CategoryQuestion as CQ
 JOIN		Question as Q
 ON			CQ.CategoryID = Q.CategoryID
 GROUP BY	CQ.CategoryID;
 -- Question 7: Thông kê mỗi Question được sử dụng trong bao nhiêu Exam
-SELECT		EQ.QuestionID, COUNT(ExamID) As So_lan_Exam_sudung
+SELECT		EQ.QuestionID, Q.Content, COUNT(ExamID) As So_lan_Exam_sudung
 FROM		Question as Q
 JOIN		ExamQuestion as EQ
 ON			Q.QuestionID = EQ.QuestionID
 GROUP BY	EQ.ExamID;
 -- Question 8: Lấy ra Question có nhiều câu trả lời nhất
-SELECT		A.QuestionID, COUNT(A.QuestionID) as So_cau_tra_loi
+
+SELECT		A.QuestionID, COUNT(A.QuestionID) as Question_nhieu_cau_traloi_nhat
 FROM		Question as Q
 JOIN		Answer as A
 ON			Q.QuestionID = A.QuestionID
 GROUP BY	A.QuestionID
+HAVING		Question_nhieu_cau_traloi_nhat = (SELECT		COUNT(A.QuestionID) as Max_answer
+FROM		Question as Q
+LEFT JOIN	Answer as A
+ON			Q.QuestionID = A.QuestionID
+GROUP BY	A.QuestionID
 ORDER BY	COUNT(A.QuestionID) DESC
-LIMIT		1;
+LIMIT		1);
 -- 9: Thống kê số lượng account trong mỗi group
 SELECT		GA.GroupID, COUNT(GA.GroupID)
 FROM		`Account` as A
-JOIN		GroupAccount as GA
+LEFT JOIN		GroupAccount as GA
 ON			A.AccountID = GA.AccountID
 GROUP BY	GA.GroupID;
 -- 10: Tìm chức vụ có ít người nhất
-SELECT		P.PositionName, COUNT(P.PositionName)
+SELECT		P.PositionName, COUNT(P.PositionName) as chucvu_itnguoinhat
 FROM		Position as P
 JOIN		`Account` as A
 ON			P.PositionID = A.PositionID
 GROUP BY	P.PositionName
-ORDER BY	COUNT(A.PositionID) ASC
-LIMIT		1;
+HAVING		chucvu_itnguoinhat = 
+	(SELECT		COUNT(P.PositionName) 
+	FROM		Position as P
+	JOIN		`Account` as A ON			P.PositionID = A.PositionID
+	GROUP BY	P.PositionName
+	ORDER BY	COUNT(A.PositionID) ASC
+	LIMIT		1);
+    
 -- 11: Thống kê mỗi phòng ban có bao nhiêu dev, test, scrum master, PM
 SELECT		A.DepartmentID, COUNT(A.PositionID), GROUP_CONCAT(P.positionName) as So_luong_Dev_Test_Scrummaster_PM
 FROM		Position as P
@@ -1407,22 +1424,26 @@ WHERE		A.QuestionID is NULL;
 -- Exercise 2: Question 17:
 
 -- a) Lấy các account thuộc nhóm thứ 1
-SELECT	AccountID
-FROM	GroupAccount
+SELECT	A.*, GA.groupID
+From 	`Account` as A
+JOIN	GroupAccount as GA on A.accountid = GA.accountid
 WHERE	GroupID = 1;
 -- b) Lấy các account thuộc nhóm thứ 2
-SELECT	AccountID
-FROM	GroupAccount
+SELECT	A.*, GA.groupID
+From 	`Account` as A
+JOIN	GroupAccount as GA on A.accountid = GA.accountid
 WHERE	GroupID = 2;
 -- c) Ghép 2 kết quả từ câu a) và câu b) sao cho không có record nào trùng nhau
-SELECT	AccountID
-FROM	GroupAccount
+SELECT	A.*, GA.groupID
+From 	`Account` as A
+JOIN	GroupAccount as GA on A.accountid = GA.accountid
 WHERE	GroupID = 1
 
 UNION
 
-SELECT	AccountID
-FROM	GroupAccount
+SELECT	A.*, GA.groupID
+From 	`Account` as A
+JOIN	GroupAccount as GA on A.accountid = GA.accountid
 WHERE	GroupID = 2;
 
 -- Question 18:

@@ -80,7 +80,7 @@ SELECT 		A.*, COUNT(GA.AccountID) So_lan_thamgia_group
 FROM 		`Account` as A
 JOIN 		groupaccount as GA on A.AccountID = GA.AccountID
 GROUP BY	A.AccountID 
-HAVING		COUNT(GA.AccountID))
+)
 
 SELECT *
 from Statistic_Account 
@@ -103,6 +103,17 @@ WITH CTE_Length_of_Content as
 SELECT	Content, Length_ct
 FROM	CTE_Length_of_Content
 WHERE	Length_ct >28;
+
+-- Xoa Content --
+WITH CTE_Length_of_Content as
+(	
+	SELECT	Question.*, length(Content)
+	FROM	question	
+    WHERE	length(Content) >28
+)
+DELETE	
+FROM  question 
+WHERE QuestionID IN (SELECT QuestionID from CTE_Length_of_Content);
 
 
 -- Xoa Content --
@@ -144,32 +155,32 @@ SELECT D.*, Count(A.DepartmentID) as Statistic_Department
 FROM	department as D
 JOIN	`account` as A on D.DepartmentID = A.DepartmentID
 GROUP BY A.DepartmentID
-HAVING	Count(A.DepartmentID))
+)
 
 SELECT * 
 FROM	CTE_Statistic_Department
 WHERE	Statistic_Department = (SELECT * FROM CTE_Max_user_in_department);
 
 
--- Question 5: Tạo view có chứa tất các các câu hỏi do user họ Neile tạo
+-- Question 5: Tạo view có chứa tất các các câu hỏi do user họ Fleury tạo
 
-DROP VIEW IF EXISTS Creator_firtname_Neile;
-CREATE VIEW Creator_firtname_Neile as
+DROP VIEW IF EXISTS Creator_firtname_Fleury;
+CREATE VIEW Creator_firtname_Fleury as
 
 SELECT	Q.QuestionID, Q.Content, Q.CategoryID, Q.TypeID, A.FullName
 FROM	question as Q
 JOIN	`account` as A on Q.CreatorID = A.AccountID
-WHERE	substring_index(A.FullName,' ',1) = 'Neile'; -- or Where A.FullName like 'Neile %';
-SELECT	*	FROM Creator_firtname_Neile;
+WHERE	substring_index(A.FullName,' ',-1) = 'Fleury'; -- or Where A.FullName like '% Fleury';
+SELECT	*	FROM Creator_firtname_Fleury;
 
--- Dung CTE: Tạo view có chứa tất các các câu hỏi do user họ Neile tạo
-WITH CTE_QuestionNeile as
+-- Dung CTE: Tạo view có chứa tất các các câu hỏi do user họ Fleury tạo
+WITH CTE_QuestionFleury as
 (
 SELECT	Q.QuestionID, Q.Content, Q.CategoryID, Q.TypeID, A.FullName
 FROM	question as Q
 JOIN	`account` as A on Q.CreatorID = A.AccountID
-WHERE	A.FullName like 'Neile %'
+WHERE	A.FullName like '% Fleury'
 )
-SELECT * FROM	CTE_QuestionNeile;
+SELECT * FROM	CTE_QuestionFleury;
 
 -- HET TESTING SYSTEM ASSIGNMENT 5 --

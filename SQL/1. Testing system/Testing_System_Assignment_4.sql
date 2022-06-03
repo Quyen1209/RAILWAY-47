@@ -1380,11 +1380,15 @@ HAVING		chucvu_itnguoinhat =
 	LIMIT		1);
     
 -- 11: Thống kê mỗi phòng ban có bao nhiêu dev, test, scrum master, PM
-SELECT		A.DepartmentID, COUNT(A.PositionID), GROUP_CONCAT(P.positionName) as So_luong_Dev_Test_Scrummaster_PM
+SELECT		A.DepartmentID,D.DepartmentName, COUNT(A.PositionID), GROUP_CONCAT(P.positionName) as So_luong_Dev_Test_Scrummaster_PM
 FROM		Position as P
 JOIN		`Account` as A
 ON			P.PositionID = A.PositionID
-GROUP BY	A.DepartmentID;
+JOIN		department as D
+ON			A.DepartmentID = D.DepartmentID
+GROUP BY	A.DepartmentID
+ORDER BY	COUNT(A.PositionID) DESC; 
+
 
 -- 12: Lấy thông tin chi tiết của câu hỏi bao gồm: thông tin cơ bản của
 -- question, loại câu hỏi, ai là người tạo ra câu hỏi, câu trả lời là gì, ...

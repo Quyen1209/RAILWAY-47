@@ -83,7 +83,7 @@ BEGIN
 			SELECT		TypeID
 			FROM		question
 			GROUP BY	TypeID
-			HAVING		COUNT(QuestionID) =(SELECT Max_question_in_typeid FROM CTE_Max_Question_in_typeID);
+			HAVING		COUNT(QuestionID) = (SELECT Max_question_in_typeid FROM CTE_Max_Question_in_typeID);
 END//
 	DELIMITER ;
 CALL	pro_get_typeId_of_max_count_question();
@@ -124,7 +124,7 @@ CREATE PROCEDURE	pro_insert_to_account
         )
 BEGIN
 DECLARE	update_userName VARCHAR(50) DEFAULT substring_index(in_email, '@', 1);
-DECLARE update_possitionID TINYINT DEFAULT 111;
+DECLARE update_possitionID TINYINT DEFAULT 1;
 DECLARE	Update_departmentID	TINYINT DEFAULT 123;
 DECLARE	Update_createDate DATE DEFAULT now();
 
@@ -247,11 +247,21 @@ BEGIN
 
 
 	WITH	CTE_6thanggannhat as
-			(	SELECT	Month(curdate() - INTERVAL 5 month) as M, Year((curdate() - INTERVAL 5 month)) as Y UNION
-				SELECT	Month(curdate() - INTERVAL 4 month) as M, Year((curdate() - INTERVAL 4 month)) as Y UNION
-				SELECT	Month(curdate() - INTERVAL 3 month) as M, Year((curdate() - INTERVAL 3 month)) as Y UNION
-				SELECT	Month(curdate() - INTERVAL 2 month) as M, Year((curdate() - INTERVAL 2 month)) as Y UNION
-				SELECT	Month(curdate() - INTERVAL 1 month) as M, Year((curdate() - INTERVAL 1 month)) as Y UNION
+			(	SELECT	Month(curdate() - INTERVAL 5 month) as M, 
+						Year((curdate() - INTERVAL 5 month)) as Y 
+                        UNION
+				SELECT	Month(curdate() - INTERVAL 4 month) as M, 
+						Year((curdate() - INTERVAL 4 month)) as Y 
+                        UNION
+				SELECT	Month(curdate() - INTERVAL 3 month) as M, 
+						Year((curdate() - INTERVAL 3 month)) as Y 
+                        UNION
+				SELECT	Month(curdate() - INTERVAL 2 month) as M, 
+						Year((curdate() - INTERVAL 2 month)) as Y 
+                        UNION
+				SELECT	Month(curdate() - INTERVAL 1 month) as M, 
+						Year((curdate() - INTERVAL 1 month)) as Y 
+                        UNION
 				SELECT	Month(curdate()) as M, Year((curdate())) as Y	),
 
 			CTE_Question_in_6month_nearest as
@@ -286,7 +296,7 @@ BEGIN
     
 		
         UPDATE	`account` As A
-        SET		A.DepartmentID = "11"
+        SET		A.DepartmentID = "1"
         WHERE	A.DepartmentID = v_departmentID;
         
         DELETE
@@ -298,6 +308,6 @@ BEGIN
 END //
 	DELIMITER ;
 
-CALL pro_DeleteDepartment_updateAccount('Accounting');
+CALL pro_DeleteDepartment_updateAccount('Eng');
 
 

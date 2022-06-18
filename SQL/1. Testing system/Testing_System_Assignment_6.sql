@@ -197,11 +197,33 @@ CALL pro_delete_exam_by_examID('12');
 
 -- 		Question 10: Tìm ra các exam được tạo từ 3 năm trước và xóa các exam đó đi (sử dụng store ở câu 9 để xóa)
 -- Sau đó in số lượng record đã remove từ các table liên quan trong khi removing
+DROP PROCEDURE IF EXISTS remove_exam;
+DELIMITER //
+CREATE PROCEDURE remove_exam()
+BEGIN
+		DECLARE Total_examid_exam INT;
+		DECLARE Total_examid_exam_question INT;
+	WITH CTE_examID as 
+		(SELECT	ExamID
+		FROM	exam
+		WHERE	year(CreateDate) < year(current_date() - interval 3 year))
+        DELETE FROM examquestion 
+		WHERE ExamID in (SELECT	*	FROM	CTE_examID);
+		SELECT row_count() INTO Total_examid_exam_question;
+		
+        WITH CTE_examID as 
+		(SELECT	ExamID
+		FROM	exam
+		WHERE	year(CreateDate) < year(current_date() - interval 3 year))
+		DELETE FROM exam 
+		WHERE ExamID in (SELECT	*	FROM	CTE_examID);
+		SELECT row_count() INTO Total_examid_exam;
+		
+		SELECT Total_examid_exam_question, Total_examid_exam;
+END //
+DELIMITER ;
 
-
-SELECT	E.ExamID, E.CreateDate
-FROM	exam as E
-WHERE	year(E.CreateDate) < year(current_date() - interval 3 year);
+CALL	remove_exam();
 
 -- Question 12: Viết store để in ra mỗi tháng có bao nhiêu câu hỏi được tạo trong năm nay - 3year
 DROP PROCEDURE IF EXISTS pro_countQuestion_eachMonth_yearNow;

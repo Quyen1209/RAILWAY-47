@@ -2,9 +2,9 @@
 -- Question 1: Tạo trigger không cho phép người dùng nhập vào Group có ngày tạo trước 1 năm trước
 
 -- Use
-
 INSERT INTO `Group` (GroupName, 				CreatorID, 	CreateDate) 
 VALUES 				('klawleyu@phoacaqa.cza', 	32, 		'2019-10-23');
+
 -- Trigger
 DROP TRIGGER IF EXISTS Insert_CreateDate_into_Group;
 	Delimiter //
@@ -14,14 +14,14 @@ FOR EACH ROW
 BEGIN
 
 IF 
-	NEW.CreateDate < (curdate() - interval 1 year) THEN
+	NEW.CreateDate <= (curdate() - interval 1 year) THEN
 	SIGNAL SQLSTATE 	'12345'
-	SET MESSAGE_TEXT = 	'Can not insert to creatdate into group';
+	SET MESSAGE_TEXT = 	'Can not insert more';
 END IF;
 
 
 END //
-Delimiter ;
+	Delimiter ;
 
 -- 		Question 2: Tạo trigger Không cho phép người dùng thêm bất kỳ user nào vào
 -- department "Sale" nữa, khi thêm thì hiện ra thông báo "Department
@@ -64,7 +64,7 @@ FOR EACH ROW
 BEGIN
 
 DECLARE	v_Count_user INT;
-SELECT	COUNT(1) INTO	v_Count_user
+SELECT	COUNT(GA.AccountID) INTO	v_Count_user
 FROM	groupaccount AS GA
 WHERE	NEW.GroupID = GA.GroupID;
 
@@ -196,6 +196,9 @@ Delimiter ;
 -- Question 8: Viết trigger sửa lại dữ liệu cho đúng:
 -- Nếu người dùng nhập vào gender của account là nam, nữ, chưa xác định
 -- Thì sẽ đổi lại thành M, F, U cho giống với cấu hình ở database
+ALTER TABLE `account`
+add Gender ENUM ('Nam', 'Nữ','Chưa xác định');
+
 DROP TRIGGER IF EXISTS Question_8;
 	Delimiter //
 CREATE TRIGGER 		Question_8
@@ -211,6 +214,8 @@ END IF;
 
 END //
 	Delimiter ;
+
+INSERT INTO `account` (Gender) VALUES ('Chưa xác định');
 
 -- Question 9: Viết trigger không cho phép người dùng xóa bài thi mới tạo được 2 ngày
 
@@ -268,3 +273,50 @@ FROM		department as D
 LEFT JOIN	`account` as A USING(DepartmentID)
 GROUP BY	A.DepartmentID;
 
+-- 	Question 10: Viết trigger chỉ cho phép người dùng chỉ được update, delete các
+-- question khi question đó chưa nằm trong exam nào
+
+
+-- update
+DROP TRIGGER IF EXISTS Question_10_Update;
+	Delimiter //
+CREATE TRIGGER 		Question_10_Update
+BEFORE UPDATE ON 	question
+FOR EACH ROW
+BEGIN
+
+IF	
+	NEW.QuestionID NOT IN (SELECT Q.QuestionID
+							FROM	question AS Q
+							LEFT JOIN examquestion AS EQ USING(QuestionID)
+							WHERE EQ.QuestionID IS NULL)
+THEN	
+    SIGNAL SQLSTATE 	'12345'
+	SET MESSAGE_TEXT = 	'Can not update data';
+END IF;
+
+END //
+	Delimiter ;
+    
+-- delete
+
+DROP TRIGGER IF EXISTS Question_10_Dalete;
+	Delimiter //
+CREATE TRIGGER 		Question_10_Dalete
+BEFORE DELETE ON 	question
+FOR EACH ROW
+BEGIN
+
+IF	
+	OLD.QuestionID NOT IN (SELECT Q.QuestionID
+							FROM	question AS Q
+							LEFT JOIN examquestion AS EQ USING(QuestionID)
+							WHERE EQ.QuestionID IS NULL)
+THEN	
+    SIGNAL SQLSTATE 	'12345'
+	SET MESSAGE_TEXT = 	'Khong the xoa data';
+END IF;
+
+END //
+	Delimiter ;
+    
